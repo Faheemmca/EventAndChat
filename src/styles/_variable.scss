@@ -1,0 +1,30 @@
+@import "./mixins";
+
+$color-primary: #00c4b1;
+$color-secondary: #1e7caf;
+$color-lightBg: #f5f8ff;
+$text-title: #3c4043;
+$text-dark: #3c4043;
+$text-light: #7d8083;
+$text-ultralight: #b5b5c3;
+
+$table-header: #cbd8e8;
+$icon-color: #7c8392;
+
+$font-size-h1: 4.6rem;
+$font-size-h2: 4.2rem;
+$font-size-h3: 3.8rem;
+$font-size-h4: 2.8rem;
+$font-size-h5: 2.2rem;
+$font-size-h6: 2rem;
+$font-size-p: 1.1rem;
+
+@media (min-width: 480px) and (max-width: 799px) {
+    $font-size-h1: 3.7rem;
+    $font-size-h2: 3.3rem;
+    $font-size-h3: 2.9rem;
+    $font-size-h4: 1.9rem;
+    $font-size-h5: 1.5rem;
+    $font-size-h6: 1.3rem;
+    $font-size-p: 0.925rem;
+}
