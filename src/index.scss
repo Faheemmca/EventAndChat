@@ -1,0 +1,15 @@
+@import "./styles/mixins";
+@import "./styles/variable";
+// Bootstraps Colours
+// $primary: teal;
+
+// @import "../node_modules/bootstrap/scss/bootstrap.scss";
+
+//Common UI Attributes
+* {
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+    // font-family: "Poppins";
+    font-family: "Raleway", sans-serif;
+}
