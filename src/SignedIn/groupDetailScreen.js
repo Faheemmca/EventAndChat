@@ -14,7 +14,7 @@ function handleset(){
 setMembersList(members)
 }
 handleset()
-
+console.log("hi",membersList)
 },[members])
 
   return (

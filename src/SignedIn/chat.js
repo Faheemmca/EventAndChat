@@ -69,6 +69,7 @@ await setDoc(doc(db,'Messages', id),{
  };
  const handleHeaderPress = () => {
   // Navigate to the GroupDetailsPage component
+  console.log('in chat',members)
   navigation.navigate('details', {  id: id,members:members });
 };
 

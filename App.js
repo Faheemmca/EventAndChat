@@ -31,7 +31,7 @@ import Chat from './src/SignedIn/chat';
 import AddMembersScreen from './src/SignedIn/addMembersScreen';
 import GroupDetailsPage from './src/SignedIn/groupDetailScreen';
 import AddParticipantsScreen from './src/SignedIn/addParticipants';
-import GroupDetailHeader from './src/SignedIn/rough';
+import GroupDetailHeader from './src/SignedIn/groupDetailHeader';
 import Profile from './src/SignedIn/profileScreen'
 
 

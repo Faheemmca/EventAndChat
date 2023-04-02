@@ -8,11 +8,9 @@ const AddEventDetails = ({navigation , route}) => {
 
   const [loading, setLoading] = useState(false);
   const { id,  event } = route.params || {};
-const [Event,setEvent] = useState([])
 
 
   useEffect(() => {
-    setEvent(event)
     
     if (id) {
       setState({
@@ -25,7 +23,7 @@ const [Event,setEvent] = useState([])
       console.log(title)
 
     } else  {
-      console.log('id is empty in addE...');
+      console.log('id is empty in addEvent...');
     }
   }, []);
 
@@ -47,35 +45,35 @@ const [Event,setEvent] = useState([])
     });
   };
 
-  const updateUser = async() => {
-    setLoading(true);
-    const useremail = auth.currentUser.email
-    const docID = event.id;
-    console.log(useremail, docID)
-   await updateDoc(doc(db, useremail, docID),{
-      Title: title,
-      Date: date,
-      Venue: venue,
-      CheifGuest: cheifGuest,
-      Description: description
-    }).then(() => {
-      setState({
-        id: '',
-        title: '',
-        date: '',
-        venue: '',
-        cheifGuest: '',
-        description: ''
-      })
-      setLoading(false);
-      navigation.navigate('HomeScreen');
-      console.log('doc updated',docID)
-    })
-      .catch((error) => {
-        console.error("Error: ", error);
-        setLoading(false);
-      });
-  };
+  // const updateUser = async() => {
+  //   setLoading(true);
+  //   const useremail = auth.currentUser.email
+  //   const docID = event.id;
+  //   console.log(useremail, docID)
+  //  await updateDoc(doc(db, useremail, docID),{
+  //     Title: title,
+  //     Date: date,
+  //     Venue: venue,
+  //     CheifGuest: cheifGuest,
+  //     Description: description
+  //   }).then(() => {
+  //     setState({
+  //       id: '',
+  //       title: '',
+  //       date: '',
+  //       venue: '',
+  //       cheifGuest: '',
+  //       description: ''
+  //     })
+  //     setLoading(false);
+  //     navigation.navigate('HomeScreen');
+  //     console.log('doc updated',docID)
+  //   })
+  //     .catch((error) => {
+  //       console.error("Error: ", error);
+  //       setLoading(false);
+  //     });
+  // };
 
   const handlecreateDoc = async () => {
     try {
@@ -88,19 +86,18 @@ const [Event,setEvent] = useState([])
         createdBy: auth.currentUser.email,
         groupName: title,
         date:date,
+        member:[],
         venue:venue,
         description:description,
       })
-      await setDoc(doc(db,'Groups',groupRef.id),{
-        id: groupRef.id
-      },{merge:true})
+     
 
       await updateDoc(doc(db,'Users', UserID),{
         groups: arrayUnion(groupRef.id)
       })
 
       
-      const docRef = collection(db, 'Messages');
+      const docRef = doc(db, 'Messages',);
       const newDocRef = await addDoc(docRef, {
         name: title,
         latestMessage: {
