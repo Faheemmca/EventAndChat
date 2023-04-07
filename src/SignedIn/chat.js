@@ -8,30 +8,32 @@ import { auth,db } from '../firebase';
 
 export default function RoomScreen({navigation,route}) {
   const [messages, setMessages] = useState([])
-   
-const {id, name,members } = route.params
+
+const {id, name } = route.params
+
+
 
 useEffect(() =>{
-  const docRef =doc(db,'Messages', id)
+  const docRef =doc(db,'Threads', id)
   const q = query(collection(docRef,'messages'), orderBy('sentAt', 'desc'))
 
   const messageListener = onSnapshot(q, (snapshot)=>{
     const newMessages = snapshot.docs.map(doc =>{
       const firebaseData = doc.data();
-      
+
       const data ={
         _id: doc.id,
         text:'',
         createdAt: new Date().getTime(),
         ...firebaseData
       }
-      if(!firebaseData.system){data.user={
+      if(!firebaseData.system)
+      {data.user={
         ...firebaseData.user,
         name: firebaseData.user.email
       }}
-      if(firebaseData.system){
-        console.log("system",firebaseData)
-      }
+      
+      
       return data;
     })
 
@@ -46,7 +48,7 @@ useEffect(() =>{
 async function handleSend(messages){
   const text = messages[0].text;
   // Use the newMessage argument instead of the text variable
-     const messagesRef = collection(db, 'Messages', id, 'messages');
+     const messagesRef = collection(db, 'Threads', id, 'messages');
      const newMessageRef = doc(messagesRef)
       await addDoc(messagesRef,{
        _id: newMessageRef.id,
@@ -59,18 +61,17 @@ async function handleSend(messages){
        }
      })
 
-await setDoc(doc(db,'Messages', id),{
-  latestMessage:{
-    text,
-    createdAt: new Date().getTime()
-  }
-},{merge:true}
-)   
+// await setDoc(doc(db,'Messages', id),{
+//   latestMessage:{
+//     text,
+//     createdAt: new Date().getTime()
+//   }
+// },{merge:true}
+// )   
  };
  const handleHeaderPress = () => {
   // Navigate to the GroupDetailsPage component
-  console.log('in chat',members)
-  navigation.navigate('details', {  id: id,members:members });
+ 
 };
 
 
@@ -103,7 +104,7 @@ await setDoc(doc(db,'Messages', id),{
     return (
       <Send {...props}>
         <View style={styles.sendingContainer}>
-                    <IconButton icon='send-circle' size={32} iconColor='#6646ee' />
+                    <IconButton icon='send-circle' size={32} iconColor='#3CA09F' />
 
         {/* <Ionicons name='send-sharp' size={24} color='white' /> */}
         </View>
@@ -138,21 +139,22 @@ await setDoc(doc(db,'Messages', id),{
     );
   };
 
-  console.log('in chat',route.params.id)
+  console.log('in chat',id)
+
+
   return (
     <View style={styles.container}>
-      <View style={{display:'flex',flexDirection:'row',alignItems:'center',borderBottomWidth: 1,
-    borderBottomColor: '#ccc',}}>
+      <View style={styles.headerContainer}>
       <TouchableOpacity 
       style={{marginLeft:10, paddingTop:12}}
       onPress={()=>navigation.goBack()}
       >
-    <Ionicons name="chevron-back" size={24} color="black"  />
+    <Ionicons name='arrow-back' size={24} color="black"  />
     </TouchableOpacity>
       <TouchableOpacity 
-            onPress={handleHeaderPress}
+            onPress={()=> navigation.navigate('details', {groupName:name,  id: id})}
       style={styles.header}>
-        <Text style={styles.headerTitle}>{route.params.name}</Text>
+        <Text style={styles.headerTitle}>{name}</Text>
       </TouchableOpacity>
       </View>
    
@@ -197,9 +199,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   container: {
+
     flex: 1,
     backgroundColor: '#fff',
   },
+  headerContainer:{
+    display:'flex',
+  flexDirection:'row',
+  alignItems:'center',
+  borderBottomWidth: 1,   
+   backgroundColor:'#7BE3DD',
+
+  borderBottomColor: '#ccc',},
   header: {
     alignItems: 'center',
     paddingHorizontal: 16,

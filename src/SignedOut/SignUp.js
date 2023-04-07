@@ -65,8 +65,8 @@ else{
         name: Name,
         email: Email,
         mobile : '+91 '+Mobile,
-        Education:Education,
-        City:City,
+        education:Education,
+        city:City,
         userUID: userUID,
         groups:[]
       })

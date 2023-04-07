@@ -33,7 +33,8 @@ import GroupDetailsPage from './src/SignedIn/groupDetailScreen';
 import AddParticipantsScreen from './src/SignedIn/addParticipants';
 import GroupDetailHeader from './src/SignedIn/groupDetailHeader';
 import Profile from './src/SignedIn/profileScreen'
-
+import EditProfile from './src/SignedIn/EditProfile';
+import Trialpic from './src/SignedIn/trialpic';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -78,6 +79,8 @@ function App(){
         <Stack.Screen name='addParticipants' component={AddParticipantsScreen} options={{headerShown:false}} />
         <Stack.Screen name='groupDetaiHeader' component={GroupDetailHeader} options={{headerShown:false}} />
         <Stack.Screen name='profile' component={Profile} options={{headerShown:false}} />
+        <Stack.Screen name='Editprofile' component={EditProfile} options={{headerShown:false}} />
+        <Stack.Screen name='trialPic' component={Trialpic} options={{headerShown:false}} />
 
 
         {/* options={({navigation,route}) =>
