@@ -5,14 +5,12 @@ import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
 LogBox.ignoreAllLogs()
 
-const GroupDetailHeader = ({navigation, id, members}) => {
-  const [membersList, setMembersList] = useState([]);
-  useEffect(()=>{
-    function handleset(){
-      setMembersList(members)
-    }
-    handleset()
-  },[members])
+const GroupDetailHeader = ({navigation, id,total, groupName}) => {
+
+
+
+ 
+console.log('in header detail',id)
 
     return (
       <View style={styles.container}>
@@ -26,10 +24,10 @@ const GroupDetailHeader = ({navigation, id, members}) => {
     </TouchableOpacity>
 
         <View style={styles.header}>
-          <Text style={styles.title}>Group Name</Text>
-          <Text style={styles.participants}>{membersList.length} participants</Text>
+          <Text style={styles.title}>{groupName}</Text>
+          <Text style={styles.participants}>{total} participants</Text>
           <View style={styles.iconContainer}>
-            <TouchableOpacity onPress={()=>{
+          <TouchableOpacity onPress={()=>{
             navigation.navigate('addParticipants',{id:id})
             }}>
             <FontAwesome name='user-plus' size={24} color='#0782f9' style={styles.icon} />
@@ -57,7 +55,8 @@ const styles = StyleSheet.create({
 
   },
   title:{
-fontSize:24
+fontSize:24,
+fontWeight:'bold'
   },
   iconContainer: {
     flexDirection: 'row',

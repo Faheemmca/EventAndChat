@@ -2,25 +2,62 @@ import React,{useState,useEffect} from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import MembersList from './membersList';
 import GroupDetailHeader from './groupDetailHeader';
-
+import { doc,getDoc, } from 'firebase/firestore';
+import { db } from '../firebase';
+import Loading from '../components/Loading'
 
 const GroupDetailsPage = ({navigation,route}) => {
-const {  id,members } = route.params 
-const [groupId,setGroupId] = useState('')
+const {  id, groupName } = route.params 
 const [membersList,setMembersList] = useState([])
-useEffect(()=>{
-function handleset(){
-  setGroupId(id)
-setMembersList(members)
-}
-handleset()
+const [total, setTotal] = useState(0)
+const [loading,setLoading] = useState(true)
 
-},[members])
+
+useEffect(()=>{
+  
+async function getInfo(){
+ const members = await getMembersInfo(id)
+ setTotal(members.length)
+ setLoading(false)
+
+}
+getInfo()
+console.log(total)
+console.log(membersList)
+},[id])
+
+const getMembersInfo = async (groupId) => {
+  try {
+    const groupDocRef = doc(db, 'Threads', groupId);
+    const groupDocSnap = await getDoc(groupDocRef);
+    const memberUids = groupDocSnap.data().member;
+
+    const members = [];
+    for (const uid of memberUids) {
+      const userDocRef = doc(db, 'Users', uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const { name, mobile } = userDocSnap.data();
+        members.push({ name, mobile });
+      } else {
+        console.log(`User document with id ${uid} does not exist`);
+      }
+    }
+    setMembersList(members)
+    return members;
+  } catch (error) {
+    console.error('Error fetching members information:', error);
+  }
+};
+
+if(loading){
+  return <Loading />
+}
 
   return (
     <View style={styles.container}>
-        <GroupDetailHeader navigation={navigation} id={id}  members={membersList} />
-        <MembersList navigation={navigation} id={groupId} members={membersList}/>
+        <GroupDetailHeader navigation={navigation} id={id} total={total} groupName={groupName}/>
+        <MembersList navigation={navigation} id={id} membersList={membersList} />
       
     </View>
   );

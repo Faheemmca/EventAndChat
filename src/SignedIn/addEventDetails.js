@@ -3,34 +3,33 @@ import React,{useState, useEffect} from 'react'
 import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from '../firebase';
 import HomeScreen from './EventListScreen';
+import Loading from '../components/Loading';
+import { async } from '@firebase/util';
 
 const AddEventDetails = ({navigation , route}) => {
 
   const [loading, setLoading] = useState(false);
-  const { id,  event } = route.params || {};
-const [Event,setEvent] = useState([])
+  const { groupid,  event } = route.params || {};
 
 
   useEffect(() => {
-    setEvent(event)
     
-    if (id) {
+    if (groupid) {
       setState({
-        title: event.Title,
-        date: event.Date,
-        venue: event.Venue,
-        cheifGuest: event.CheifGuest,
-        description: event.Description
+        title: event.groupName,
+        date: event.date,
+        venue: event.venue,
+        cheifGuest: event.cheifGuest,
+        description: event.description
       });
       console.log(title)
 
     } else  {
-      console.log('id is empty in addE...');
+      console.log('create new group');
     }
   }, []);
 
   const [state, setState] = useState({
-    id: id ? id : '',
     title: event ? event.Title : '',
     date: event ? event.Date : '',
     venue: event ? event.Venue : '',
@@ -47,35 +46,29 @@ const [Event,setEvent] = useState([])
     });
   };
 
-  const updateUser = async() => {
-    setLoading(true);
-    const useremail = auth.currentUser.email
-    const docID = event.id;
-    console.log(useremail, docID)
-   await updateDoc(doc(db, useremail, docID),{
-      Title: title,
-      Date: date,
-      Venue: venue,
-      CheifGuest: cheifGuest,
-      Description: description
-    }).then(() => {
-      setState({
-        id: '',
-        title: '',
-        date: '',
-        venue: '',
-        cheifGuest: '',
-        description: ''
-      })
-      setLoading(false);
-      navigation.navigate('HomeScreen');
-      console.log('doc updated',docID)
-    })
-      .catch((error) => {
-        console.error("Error: ", error);
-        setLoading(false);
+  
+
+  const handleEditDoc = async() => {
+    try {
+      setLoading(true);
+      const groupRef = doc(db, 'Threads', groupid);
+      await updateDoc(groupRef, {
+        groupName: title,
+        date: date,
+        venue: venue,
+        cheifGuest: cheifGuest,
+        description: description,
       });
+      setLoading(false);
+      console.log('Document updated');
+      navigation.goBack();
+    } catch (e) {
+      setLoading(false);
+      console.error('Error updating document: ', e);
+    }
   };
+  
+
 
   const handlecreateDoc = async () => {
     try {
@@ -83,42 +76,31 @@ const [Event,setEvent] = useState([])
       setLoading(true);
      
 
-   const groupRef =   await addDoc(collection(db,'Groups'),{
+   const groupRef =   await addDoc(collection(db,'Threads'),{
         createdAt: new Date().getTime(),
-        createdBy: auth.currentUser.email,
+        createdBy: auth.currentUser.uid,
         groupName: title,
         date:date,
+        member:arrayUnion(auth.currentUser.uid),
         venue:venue,
+        cheifGuest:cheifGuest,
         description:description,
-      })
-      await setDoc(doc(db,'Groups',groupRef.id),{
-        id: groupRef.id
-      },{merge:true})
-
-      await updateDoc(doc(db,'Users', UserID),{
-        groups: arrayUnion(groupRef.id)
-      })
-
-      
-      const docRef = collection(db, 'Messages');
-      const newDocRef = await addDoc(docRef, {
-        name: title,
-        latestMessage: {
-          text: `You have joined the room ${title}.`,
+        latestMessage:{
+          text: `You have joined the event ${title}`,
           createdAt: new Date().getTime()
         }
-      });
-      const messagesRef = collection(newDocRef, 'messages');
-      await addDoc(messagesRef, {
-        text: `You have joined the room ${title}.`,
-        createdAt: new Date().getTime(),
-        system: true
-      });
-      
-
+      })
+     await addDoc(collection(groupRef,'messages'),{
+      text: `You have joined the event ${title}`,
+          createdAt: new Date().getTime(),
+          system: true
+     })
+      console.log(title)
 
 
       console.log("Document written with ID: ", groupRef.id);
+      navigation.replace('HomeScreen');
+
     } catch (e) {
       setLoading(false);
       console.error("Error adding document: ", e);
@@ -130,26 +112,21 @@ const [Event,setEvent] = useState([])
 
   const handleAddEvent = async () => {
     setLoading(true);
-
-    if (id) {
-      await updateUser();
-    } else {
-      await handlecreateDoc();
-    }
+ if(groupid){
+  await   handleEditDoc()
+ }   
+ else{
+  await   handlecreateDoc() 
+ }
     setLoading(false);
 
-    navigation.navigate('HomeScreen');
   };
 
 
 
 
   if(loading){
-    return(
-      <View style={styles.container}>
-      <ActivityIndicator size="large" color="0000ff" />
-     </View>
-    )
+    return <Loading />
   }
 
 
@@ -157,7 +134,8 @@ const [Event,setEvent] = useState([])
     <ScrollView >
         <View style={styles.container}>
         <View style={styles.inputContainer}> 
- <Text>Event Title:</Text>
+        
+ <Text style={{color:'#4D9B99'}}>Event Title:</Text>
  <TextInput 
  placeholder='Event Title'
  value={title}
@@ -165,7 +143,7 @@ const [Event,setEvent] = useState([])
  style={styles.input}
  />
 
-  <Text>Date:</Text>
+  <Text style={{color:'#4D9B99'}}>Date:</Text>
   <TextInput 
  placeholder='Date'
  value={date}
@@ -174,7 +152,7 @@ const [Event,setEvent] = useState([])
  style={styles.input}
  />
 
-  <Text>Venue:</Text>
+  <Text style={{color:'#4D9B99'}}>Venue:</Text>
   <TextInput 
  placeholder='Venue'
  value={venue}
@@ -183,7 +161,7 @@ const [Event,setEvent] = useState([])
  style={styles.input}
  />
 
-  <Text>Cheif Guest:</Text>
+  <Text style={{color:'#4D9B99'}}>Cheif Guest:</Text>
   <TextInput 
  placeholder='Cheif Guest'
  value={cheifGuest}
@@ -192,7 +170,7 @@ const [Event,setEvent] = useState([])
  style={styles.input}
  />
 
-<Text>Description:</Text>
+<Text style={{color:'#4D9B99'}}>Description:</Text>
  <TextInput 
  placeholder='Description'
  value={description}
@@ -206,9 +184,9 @@ const [Event,setEvent] = useState([])
     <TouchableOpacity 
     onPress={handleAddEvent}
     >
-        <Text style={styles.button}>
+     {  groupid ?<Text style={styles.button}>Done</Text>  : <Text style={styles.button}>
             Add Event
-        </Text>
+        </Text>}
     </TouchableOpacity>
  </View>
         </View>
@@ -235,10 +213,12 @@ alignItems:'center'
         paddingVertical: 10,
         borderRadius: 10,
         marginTop: 5,
-        marginBottom:15
+        marginBottom:15,
+        borderWidth:1,
+        borderColor:'#7BE3DD'
       },
       button:{
-        backgroundColor: '#0782F9',
+        backgroundColor: '#5AC2B9',
         width: '100%',
         padding: 15,
         borderRadius: 10,

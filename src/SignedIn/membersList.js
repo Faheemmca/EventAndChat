@@ -3,15 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
 import { getDoc, doc, onSnapshot } from 'firebase/firestore';
 
-const MembersList = ({navigation, id,members}) => {
-  const [membersList, setMembersList] = useState([]);
- 
+const MembersList = ({navigation, id,membersList}) => {
+ const [members,setMembers] = useState([])
+
 useEffect(()=>{
-  function handleset(){
-    setMembersList(members)
-  }
-  handleset()
-},[members])
+  setMembers(membersList)
+},[id])
+
+
+console.log('in memberList',members)
 
   return (
     <View style={styles.membersList}>
@@ -25,6 +25,7 @@ useEffect(()=>{
         </View>
       }
         keyExtractor={(item, index) => index.toString()}
+        ListEmptyComponent={!membersList && <Text>No members to display</Text>}
       />
     </View>
   );

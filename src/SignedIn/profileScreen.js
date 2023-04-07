@@ -1,86 +1,106 @@
 import React from 'react'
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { auth } from '../firebase'
+import { auth, db } from '../firebase'
 import { useState, useEffect } from 'react'
-import { collection } from 'firebase/firestore'
 import { color } from 'react-native-reanimated'
 import * as ImagePicker from 'expo-image-picker'
+import { onSnapshot,doc, getDoc, updateDoc } from 'firebase/firestore'
 
 export default Profile = ({navigation, route}) => {
   
-  const user = route.params.user
-const [image, setImage] = useState(null)
+  const userId = auth.currentUser.uid
+  const [image, setImage] = useState(null)
+  const [user, setUser] = useState(null)
 
-useEffect(()=>{
-  
-})
-
-
-const pickImage = async () => {
-  // No permissions request is necessary for launching the image library
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.All,
-    allowsEditing: true,
-    aspect: [3,4],
-    quality: 1,
-  });
-
-  console.log(result);
-
-  if (!result.canceled) {
-    setImage(result.assets[0].uri);
-    
-  }
-};
-
-    const handleSignOut = async() => {
-        try{
-          if (auth.currentUser) {
-            console.log('user signed out', auth.currentUser.email);
-            await AsyncStorage.setItem('email','')
-            await AsyncStorage.setItem('password','')
-            await auth.signOut();
-     
-
-          }
-        }
-        catch(error){
-          alert(error.message)
-        } 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userDoc = await getDoc(doc(db, 'Users', userId));
+      if (userDoc.exists()) {
+        setUser(userDoc.data());
+        console.log(userDoc.data())
+      } else {
+        console.log('User does not exist');
       }
+    };
+  
+    fetchUser();
+    return () => fetchUser()
+  }, [userId])
 
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [3,4],
+      quality: 1,
+    });
 
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      // set the uri field in user data if it does not exist
+      
+      if (user) {
+        console.log('this is uri',result.assets[0].uri)
+     await   updateDoc(doc(db, 'Users', userId), { uri: result.assets[0].uri });
+
+      }
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      if (auth.currentUser) {
+        console.log('user signed out', auth.currentUser.email);
+        await AsyncStorage.setItem('email','')
+        await AsyncStorage.setItem('password','')
+        await auth.signOut();
+      }
+    }
+    catch(error) {
+      alert(error.message)
+    } 
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.header}></View>
 
+      <TouchableOpacity style={styles.selctImagebutton} onPress={pickImage}>
+        <View style={styles.photo}>
+          <Image source={{ uri: image || ((user && user.uri) && user.uri) }} style={styles.avatar}
+          onLoad ={() => {
+            if(!user || !user.uri){
+              console.log('there is no image')
+            }
+          }}
+          />
+          <Text style={{ color: '#0782f9' }}>
+  {image || (user && user.uri) ? 'Edit picture' : 'Select a picture'}
+</Text>
 
-      <TouchableOpacity style={styles.selctImagebutton}
-      onPress={()=>pickImage()}
-      >
-     <View style={styles.photo}>
-     <Image
-     source={{uri:image}}
-        style={styles.avatar}
-      />
-      <Text style={{color:'#0782f9'}}>select an image</Text>
-     </View>
+        </View>
       </TouchableOpacity>
 
-
       <View style={styles.body}>
-          <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.description}>mobile: {user.mobile}{}</Text>
-          <Text style={styles.description}>Email: {user.email}</Text>
+        <Text style={styles.name}>{user?.name}</Text>
+        <Text style={styles.description}>Mobile: {user?.mobile}</Text>
+        <Text style={styles.description}>Email: {user?.email}</Text>
+        <Text style={styles.description}>Education: {user?.education}</Text>
+        <Text style={styles.description}>City: {user?.city}</Text>
 
-         <TouchableOpacity
-         
-         onPress={handleSignOut}>
-            <Text style={styles.signOut}>Sign out</Text>
-         </TouchableOpacity>
-        
+
+        <TouchableOpacity >
+          <Text style={styles.signOut}
+          onPress ={()=>navigation.navigate('Editprofile',{user:user})}
+          >Edit Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleSignOut}>
+          <Text style={styles.signOut}>Sign out</Text>
+        </TouchableOpacity>
       </View>
     </View>
   )

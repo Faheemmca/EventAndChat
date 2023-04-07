@@ -90,6 +90,7 @@ const SignIn = ({ navigation }) => {
           style={styles.input}
           secureTextEntry
         />
+        
       </View>
 
       <View style={styles.buttonContainer}>
